@@ -1,19 +1,26 @@
 import logging
+from collections import OrderedDict
 
-from rest_framework import serializers
+import six
 
-from mysite.models import Manufacturer, Car
-from mysite.admin import ManufacturerAdminForm
-from mysite import class_form_mapping
+from django.core.exceptions import ImproperlyConfigured
+
+from rest_framework import serializers, relations
 
 
 logger = logging.getLogger("django")
 
 
-class CarSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Car
-        #fields = ('id', 'title', 'code', 'linenos', 'language', 'style')
+class RelaxedHyperlinkedRelatedField(relations.HyperlinkedRelatedField):
+    """DRF does not provide a convenient hook to exclude fields which don't
+have a target view. A custom field class at least returns a string."""
+    def to_representation(self, value):
+        try:
+            return super(
+                RelaxedHyperlinkedRelatedField, self
+            ).to_representation(value)
+        except ImproperlyConfigured:
+            return "__not_implemented__"
 
 
 class FormMixin(object):
@@ -22,32 +29,9 @@ class FormMixin(object):
         class MySerializer(FormMixin, ModelSerializer):
             pass
     """
-    _form_class = None
-
-    def x__init__(self, *args, **kwargs):
-        super(FormMixin, self).__init__(self, *args, **kwargs)
-
-        # Inspect registry to see if a mapping exists. Viewset takes precedence
-        # over serializer because viewset is usually in scope when the mapping is made,
-        # thus saving on an import.
-        #klass = class_form_mapping.get(self.context["view"].__class__)
-        #if klass is None:
-        #    klass = class_form_mapping.get(self.__class__)
-        #self._form_class = klass
-
-    #@property
-    #def fields(self):
-    #    fields = super(FormMixin, self).fields
-    #    print fields
 
     def validate(self, attrs):
-        #import pdb;pdb.set_trace()
-        # Inspect registry to see if a mapping exists. Viewset takes precedence
-        # over serializer because viewset is usually in scope when the mapping is made,
-        # thus saving on an import.
-        klass = class_form_mapping.get(self.context["view"].__class__)
-        if klass is None:
-            klass = class_form_mapping.get(self.__class__)
+        klass = getattr(self.Meta, 'form', None)
         if klass:
             form = klass(attrs)
             diff = set(form.fields.keys()) - set(self.fields.keys())
@@ -65,12 +49,23 @@ serializer %s. You may encounter problems.""" % \
         return super(FormMixin, self).validate(attrs)
 
 
-class ManufacturerSerializer(FormMixin, serializers.HyperlinkedModelSerializer):
-    
-    class Meta:
-        model = Manufacturer
+class SerializerMeta(serializers.SerializerMetaclass):
 
-    def validate_year(self, value):
-        if value < 2010:
-            raise serializers.ValidationError("Serializer says year must be after 2010")
-        return value
+    def __new__(cls, name, bases, attrs):
+        model = attrs.pop("model", None)
+        form = attrs.pop("form", None)
+        cls = super(SerializerMeta, cls).__new__(cls, name, bases, attrs)
+        meta_klass = type(
+            "Meta",
+            (object,),
+            {"model": model, "form": form}
+        )
+        setattr(cls, "Meta", meta_klass)
+        print id(cls.Meta)
+        return cls
+
+
+@six.add_metaclass(SerializerMeta)
+class FooSerializer(FormMixin, serializers.HyperlinkedModelSerializer):
+
+    serializer_related_field = RelaxedHyperlinkedRelatedField
