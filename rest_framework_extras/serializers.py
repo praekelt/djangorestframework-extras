@@ -1,5 +1,4 @@
 import logging
-from collections import OrderedDict
 
 import six
 
@@ -31,6 +30,7 @@ class FormMixin(object):
     """
 
     def validate(self, attrs):
+        """Delegate validation to form if it is set"""
         klass = getattr(self.Meta, 'form', None)
         if klass:
             form = klass(attrs)
@@ -47,6 +47,20 @@ serializer %s. You may encounter problems.""" % \
                     del form.errors["__all__"]
                 raise serializers.ValidationError(form.errors)
         return super(FormMixin, self).validate(attrs)
+
+    def save(self, **kwargs):
+        """Delegate save to form if it is set"""
+        klass = getattr(self.Meta, "form", None)
+        if not klass:
+            return super(FormMixin, self).save(**kwargs)
+
+        validated_data = dict(
+            list(self.validated_data.items()) +
+            list(kwargs.items())
+        )
+        form = klass(validated_data)
+        self.instance = form.save()
+        return self.instance
 
 
 class SerializerMeta(serializers.SerializerMetaclass):
@@ -66,6 +80,5 @@ class SerializerMeta(serializers.SerializerMetaclass):
 
 
 @six.add_metaclass(SerializerMeta)
-class FooSerializer(FormMixin, serializers.HyperlinkedModelSerializer):
-
+class HyperlinkedModelSerializer(FormMixin, serializers.HyperlinkedModelSerializer):
     serializer_related_field = RelaxedHyperlinkedRelatedField
