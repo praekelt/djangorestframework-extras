@@ -1,4 +1,5 @@
 import types
+import logging
 from collections import OrderedDict
 
 from django.conf import settings
@@ -6,6 +7,9 @@ from django.conf import settings
 from rest_framework import viewsets
 
 from rest_framework_extras.serializers import HyperlinkedModelSerializer
+
+
+logger = logging.getLogger("django")
 
 
 def discover(router, override=None, only=None, exclude=None):
@@ -19,9 +23,10 @@ def discover(router, override=None, only=None, exclude=None):
     # If only is set it trumps normal discovery
     if only is None:
         for app in reversed(settings.INSTALLED_APPS):
-            for ct in ContentType.objects.filter(app_label=app):
+            for ct in ContentType.objects.filter(app_label=app.split(".")[-1]):
                 filters["%s.%s" % (ct.app_label, ct.model)] = {"content_type": ct}
 
+    # Parse the setting
     for el in ((only or []) or (override or [])):
         pattern_or_name = form = admin = admin_site = None
         if isinstance(el, (types.ListType, types.TupleType)):
@@ -77,4 +82,6 @@ def discover(router, override=None, only=None, exclude=None):
                 "queryset": model.objects.all()
             }
         )
-        router.register(r"%s-%s" % (ct.app_label, ct.model), viewset_klass)
+        pth = r"%s-%s" % (ct.app_label, ct.model)
+        logger.info("DRFE: registering API url %s" % pth)
+        router.register(pth, viewset_klass)

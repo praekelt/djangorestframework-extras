@@ -63,7 +63,7 @@ class FormMixin(object):
 
         diff = set(form.fields.keys()) - set(self.fields.keys())
         if diff:
-            logger.warning("""The field(s) "%s" are in the form %s but not in the \
+            logger.warning("""DRFE: the field(s) "%s" are in the form %s but not in the \
 serializer %s. You may encounter problems.""" % \
             (", ".join(diff), klass.__name__, self.__class__.__name__)
             )
