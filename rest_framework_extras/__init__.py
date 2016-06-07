@@ -1,4 +1,5 @@
 import types
+from collections import OrderedDict
 
 from django.conf import settings
 
@@ -10,48 +11,70 @@ from rest_framework_extras.serializers import HyperlinkedModelSerializer
 def discover(router, override=None, only=None, exclude=None):
     """Generate default serializers and viewsets"""
 
-    # Import late because apps may not be leaded yet
+    # Import late because apps may not be loaded yet
     from django.contrib.contenttypes.models import ContentType
 
-    # Default
-    filters = [{"app_label": app} for app in reversed(settings.INSTALLED_APPS)]
+    filters = OrderedDict()
 
     # If only is set it trumps normal discovery
-    if only is not None:
-        filters = []
-        for el in only:
-            pattern_or_name = form = None
-            if isinstance(el, (types.ListType, types.TupleType)):
-                pattern_or_name, form = el
-            else:
-                pattern_or_name = el
-            if "." in pattern_or_name:
-                app_label, model = pattern_or_name.split(".")
-                filters.append({"app_label": app_label, "model": model, "form": form})
-            else:
-                filters.append({"app_label": pattern_or_name, "form": form})
+    if only is None:
+        for app in reversed(settings.INSTALLED_APPS):
+            for ct in ContentType.objects.filter(app_label=app):
+                filters["%s.%s" % (ct.app_label, ct.model)] = {"content_type": ct}
+
+    for el in ((only or []) or (override or [])):
+        pattern_or_name = form = admin = admin_site = None
+        if isinstance(el, (types.ListType, types.TupleType)):
+            pattern_or_name, di = el
+            form = di.get("form", None)
+            admin = di.get("admin", None)
+            admin_site = di.get("admin_site", None)
+            if any((admin, admin_site)) and not all((admin, admin_site)):
+                raise RuntimeError, "admin and admin_site are mutually inclusive"
+        else:
+            pattern_or_name = el
+        di = {}
+        if "." in pattern_or_name:
+            app_label, model = pattern_or_name.split(".")
+            di = {"app_label": app_label, "model": model}
+        else:
+            di = {"app_label": pattern_or_name}
+        for ct in ContentType.objects.filter(**di):
+            filters["%s.%s" % (ct.app_label, ct.model)] = {
+                "content_type": ct,
+                "form": form,
+                "admin": admin,
+                "admin_site": admin_site
+            }
 
     if exclude is not None:
         raise NotImplementedError
 
-    for filter in filters:
-        form = filter.pop("form", None)
-        for ct in ContentType.objects.filter(**filter):
-            model = ct.model_class()
-            if not hasattr(model, "objects"):
-                continue
-            prefix = "%s%s" % (ct.app_label.capitalize(), model.__name__)
-            serializer_klass = type(
-                str("%sSerializer" % prefix),
-                (HyperlinkedModelSerializer,),
-                {"model": model, "form": form}
-            )
-            viewset_klass = type(
-                str("%sViewSet" % prefix),
-                (viewsets.ModelViewSet,),
-                {
-                    "serializer_class": serializer_klass,
-                    "queryset": model.objects.all()
-                }
-            )
-            router.register(r"%s-%s" % (ct.app_label, ct.model), viewset_klass)
+    for di in filters.values():
+        ct = di["content_type"]
+        form = di.pop("form", None)
+        admin = di.pop("admin", None)
+        admin_site = di.pop("admin_site", None)
+        model = ct.model_class()
+        if not hasattr(model, "objects"):
+            continue
+        prefix = "%s%s" % (ct.app_label.capitalize(), model.__name__)
+        serializer_klass = type(
+            str("%sSerializer" % prefix),
+            (HyperlinkedModelSerializer,),
+            {
+                "model": model,
+                "form": form,
+                "admin": admin,
+                "admin_site": admin_site
+            }
+        )
+        viewset_klass = type(
+            str("%sViewSet" % prefix),
+            (viewsets.ModelViewSet,),
+            {
+                "serializer_class": serializer_klass,
+                "queryset": model.objects.all()
+            }
+        )
+        router.register(r"%s-%s" % (ct.app_label, ct.model), viewset_klass)
