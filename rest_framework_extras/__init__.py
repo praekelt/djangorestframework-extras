@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from django.conf import settings
 
-from rest_framework import viewsets
+#from rest_framework import viewsets
 
 from rest_framework_extras.serializers import HyperlinkedModelSerializer
 
@@ -17,6 +17,7 @@ def discover(router, override=None, only=None, exclude=None):
 
     # Import late because apps may not be loaded yet
     from django.contrib.contenttypes.models import ContentType
+    from rest_framework import viewsets
 
     filters = OrderedDict()
 
