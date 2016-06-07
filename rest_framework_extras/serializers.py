@@ -1,5 +1,6 @@
 import types
 import logging
+from collections import OrderedDict
 
 import six
 
@@ -44,6 +45,18 @@ class FormMixin(object):
         elif form_klass:
             return form_klass
         return None
+
+    def get_initial(self):
+        form_class = self.form_class
+        if not form_class:
+            return super(FormMixin, self).get_initial(attrs)
+
+        form = form_class()
+        return OrderedDict([
+            (field.field_name, form.initial.get(field.field_name, None))
+            for field in self.fields.values()
+            if not field.read_only
+         ])
 
     def validate(self, attrs):
         """Delegate validation to form if it is set"""
