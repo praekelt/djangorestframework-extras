@@ -6,6 +6,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.client import Client, RequestFactory
 
+from rest_framework.test import APIRequestFactory, APIClient
+
 from rest_framework_extras.tests import models
 
 
@@ -23,8 +25,8 @@ class ViewsTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.request = RequestFactory()
-        cls.client = Client()
+        cls.factory = APIRequestFactory()
+        cls.client = APIClient()
 
         # Editor
         cls.editor = get_user_model().objects.create(
@@ -73,6 +75,22 @@ class ViewsTestCase(unittest.TestCase):
         response = self.client.post("/tests-vanilla/", data)
         as_json = json.loads(response.content)
         self.assertEqual(as_json, get_control(pk=new_pk))
+        self.assertTrue(models.Vanilla.objects.filter(pk=new_pk).exists())
+
+    def test_vanilla_patch(self):
+        data = {
+            "editable_field": "editable_field_x",
+        }
+        response = self.client.patch(
+            "/tests-vanilla/%s/" % self.vanilla.pk,
+            data,
+        )
+        as_json = json.loads(response.content)
+        self.assertEqual(as_json["editable_field"], "editable_field_x")
+        self.assertEqual(
+            models.Vanilla.objects.get(pk=self.vanilla.pk).editable_field,
+            "editable_field_x"
+        )
 
     def test_with_form_list(self):
         response = self.client.get("/tests-withform/")
@@ -94,4 +112,20 @@ class ViewsTestCase(unittest.TestCase):
         response = self.client.post("/tests-withform/", data)
         as_json = json.loads(response.content)
         self.assertEqual(as_json, get_control(model="withform", pk=new_pk))
+        self.assertTrue(models.WithForm.objects.filter(pk=new_pk).exists())
+
+    def test_with_form_patch(self):
+        data = {
+            "editable_field": "editable_field_x",
+        }
+        response = self.client.patch(
+            "/tests-withform/%s/" % self.vanilla.pk,
+            data,
+        )
+        as_json = json.loads(response.content)
+        self.assertEqual(as_json["editable_field"], "editable_field_x")
+        self.assertEqual(
+            models.WithForm.objects.get(pk=self.with_form.pk).editable_field,
+            "editable_field_x"
+        )
 

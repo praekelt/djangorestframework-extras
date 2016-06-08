@@ -12,7 +12,7 @@ router = routers.SimpleRouter()
 
 #router.register(r"manufacturers", ManufacturerViewSet)
 discover(router, override=[
-        ("tests.vanilla", dict(form=forms.VanillaForm)),
+        ("tests.withform", dict(form=forms.WithFormForm)),
         #("tests.shoo", dict(admin=ModelBaseAdmin, admin_site=admin.site)),
     ]
 )

@@ -6,6 +6,7 @@ import six
 
 from django.db.models.base import Model
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers, relations
 
@@ -46,17 +47,29 @@ class FormMixin(object):
             return form_klass
         return None
 
+    def get_cached_form(self, data=None):
+        if hasattr(self, "_form"):
+            return self._form
+
+        form_class = self.form_class
+        if form_class:
+            setattr(self, "_form", form_class(data, instance=self.instance))
+            return self._form
+
+        return None
+
     def get_initial(self):
         form_class = self.form_class
         if not form_class:
             return super(FormMixin, self).get_initial(attrs)
 
-        form = form_class()
+        # We need a fresh instance to get initial values
+        form = form_class(instance=self.instance)
         return OrderedDict([
             (field.field_name, form.initial.get(field.field_name, None))
             for field in self.fields.values()
             if not field.read_only
-         ])
+        ])
 
     def validate(self, attrs):
         """Delegate validation to form if it is set"""
@@ -72,15 +85,34 @@ class FormMixin(object):
             elif hasattr(value, "pk"):
                 attrs[key] = value.pk
 
-        form = form_class(attrs)
+        form = self.get_cached_form(attrs)
 
         diff = set(form.fields.keys()) - set(self.fields.keys())
         if diff:
-            logger.warning("""DRFE: the field(s) "%s" are in the form %s but not in the \
-serializer %s. You may encounter problems.""" % \
-            (", ".join(diff), klass.__name__, self.__class__.__name__)
+            logger.warning("""DRFE: the field(s) "%s" are in the form %s but \
+not in the serializer %s. You may encounter problems.""" % \
+                (", ".join(diff), form_class.__name__, self.__class__.__name__)
             )
+
         if not form.is_valid():
+
+            # Patch requests don't necessarily contain all the fields. Discard
+            # validation errors on those not present.
+            if self.context["request"].method.lower() == "patch":
+                logger.warning("""DRFE: doing a PATCH for serializer %s with \
+form %s. You may encounter problems.""" % \
+                    (self.__class__.__name__, form_class.__name__)
+                )
+
+                for k, v in form.errors.items():
+                    # This string matching is ugly but our only option
+                    if v == [_("This field is required.")]:
+                        del form.errors[k]
+                        del form.fields[k]
+                        exclude = list(getattr(form.Meta, "exclude", []))
+                        exclude.append(k)
+                        setattr(form.Meta, "exclude", exclude)
+
             # Map global error
             if "__all__" in form.errors:
                 form.errors["non_field_errors"] = form.errors["__all__"]
@@ -92,16 +124,17 @@ serializer %s. You may encounter problems.""" % \
     def save(self, **kwargs):
         """Delegate save to form if it is set"""
 
-        form_class = self.form_class
-        if not form_class:
+        form = self.get_cached_form()
+        if not form:
             return super(FormMixin, self).save(**kwargs)
 
-        validated_data = dict(
-            list(self.validated_data.items()) +
-            list(kwargs.items())
-        )
-        form = form_class(validated_data)
-        self.instance = form.save()
+        try:
+            self.instance = form.save()
+        except Exception, exc:
+            if self.context["request"].method.lower() == "patch":
+                raise """DRFE: save failed with %s. This may be because \
+ request was a PATCH.""" % exc
+            raise
         return self.instance
 
 
