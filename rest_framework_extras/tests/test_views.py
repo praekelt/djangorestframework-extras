@@ -11,10 +11,12 @@ from rest_framework.test import APIRequestFactory, APIClient
 from rest_framework_extras.tests import models
 
 
-def get_control(model="vanilla", pk=1):
+def get_control(model="vanilla", pk=1, another_editable_field_suffix=""):
     return {
         u"url": u"http://testserver/tests-%s/%s/" % (model, pk),
         u"editable_field": u"editable_field",
+        u"another_editable_field": u"another_editable_field%s" \
+            % another_editable_field_suffix,
         u"many_field": [u"http://testserver/tests-bar/1/"],
         u"foreign_field": u"http://testserver/tests-bar/1/",
         u"non_editable_field": u""
@@ -43,6 +45,7 @@ class ViewsTestCase(unittest.TestCase):
 
         cls.vanilla = models.Vanilla.objects.create(
             editable_field="editable_field",
+            another_editable_field="another_editable_field",
             foreign_field=cls.bar
         )
         cls.vanilla.many_field = [cls.bar]
@@ -50,10 +53,19 @@ class ViewsTestCase(unittest.TestCase):
 
         cls.with_form = models.WithForm.objects.create(
             editable_field="editable_field",
+            another_editable_field="another_editable_field",
             foreign_field=cls.bar
         )
         cls.with_form.many_field = [cls.bar]
         cls.with_form.save()
+
+        cls.with_tricky_form = models.WithTrickyForm.objects.create(
+            editable_field="editable_field",
+            another_editable_field="another_editable_field",
+            foreign_field=cls.bar
+        )
+        cls.with_tricky_form.many_field = [cls.bar]
+        cls.with_tricky_form.save()
 
     def test_vanilla_list(self):
         response = self.client.get("/tests-vanilla/")
@@ -69,6 +81,7 @@ class ViewsTestCase(unittest.TestCase):
         new_pk = models.Vanilla.objects.all().last().id + 1
         data = {
             "editable_field": "editable_field",
+            "another_editable_field": "another_editable_field",
             "foreign_field": "http://testserver/tests-bar/1/",
             "many_field": ["http://testserver/tests-bar/1/"],
         }
@@ -106,6 +119,7 @@ class ViewsTestCase(unittest.TestCase):
         new_pk = models.WithForm.objects.all().last().id + 1
         data = {
             "editable_field": "editable_field",
+            "another_editable_field": "another_editable_field",
             "foreign_field": "http://testserver/tests-bar/1/",
             "many_field": ["http://testserver/tests-bar/1/"],
         }
@@ -128,4 +142,28 @@ class ViewsTestCase(unittest.TestCase):
             models.WithForm.objects.get(pk=self.with_form.pk).editable_field,
             "editable_field_x"
         )
+
+    def test_with_tricky_form_list(self):
+        response = self.client.get("/tests-withtrickyform/")
+        as_json = json.loads(response.content)
+        self.assertEqual(as_json[0], get_control(model="withtrickyform"))
+
+    def test_with_tricky_form_create(self):
+        new_pk = models.WithTrickyForm.objects.all().last().id + 1
+        data = {
+            "editable_field": "editable_field",
+            "another_editable_field": "another_editable_field",
+            "foreign_field": "http://testserver/tests-bar/1/",
+            "many_field": ["http://testserver/tests-bar/1/"],
+            "an_integer": 777,
+        }
+        response = self.client.post("/tests-withtrickyform/", data)
+        as_json = json.loads(response.content)
+        #print as_json
+        self.assertEqual(as_json, get_control(
+            model="withtrickyform",
+            pk=new_pk,
+            another_editable_field_suffix="another_editable_field"
+        ))
+        self.assertTrue(models.WithTrickyForm.objects.filter(pk=new_pk).exists())
 

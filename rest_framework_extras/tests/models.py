@@ -7,6 +7,7 @@ class Bar(models.Model):
 
 class Base(models.Model):
     editable_field = models.CharField(max_length=32)
+    another_editable_field = models.CharField(max_length=32)
     non_editable_field = models.CharField(max_length=32, editable=False)
     foreign_field = models.ForeignKey(
         Bar,
@@ -22,6 +23,10 @@ class Vanilla(Base):
 
 
 class WithForm(Base):
+    pass
+
+
+class WithTrickyForm(Base):
     pass
 
 

@@ -11,10 +11,12 @@ from rest_framework_extras.tests import forms
 router = routers.SimpleRouter()
 
 #router.register(r"manufacturers", ManufacturerViewSet)
-discover(router, override=[
+discover(router,
+    override=[
         ("tests.withform", dict(form=forms.WithFormForm)),
+        ("tests.withtrickyform", dict(form=forms.WithFormTrickyForm)),
         #("tests.shoo", dict(admin=ModelBaseAdmin, admin_site=admin.site)),
-    ]
+    ],
 )
 
 urlpatterns = [
