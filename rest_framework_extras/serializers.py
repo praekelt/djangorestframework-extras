@@ -10,7 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers, relations
 
-
 logger = logging.getLogger("django")
 
 
@@ -53,8 +52,11 @@ class FormMixin(object):
 
         form_class = self.form_class
         if form_class:
-            #import pdb;pdb.set_trace()
-            setattr(self, "_form", form_class(data, instance=self.instance))
+            setattr(self, "_form", form_class(
+                data,
+                instance=self.instance if isinstance(self.instance, Model) \
+                    else None)
+            )
             return self._form
 
         return None
@@ -65,12 +67,16 @@ class FormMixin(object):
             return super(FormMixin, self).get_initial(attrs)
 
         # We need a fresh instance to get initial values
-        form = form_class(instance=self.instance)
-        return OrderedDict([
-            (field.field_name, form.initial.get(field.field_name, None))
-            for field in self.fields.values()
-            if not field.read_only
-        ])
+        form = form_class(
+            instance=self.instance if isinstance(self.instance, Model) else None
+        )
+        res = OrderedDict()
+        for field_name, field in form.fields.items():
+            if field.initial:
+                res[field_name] = self.fields[field_name].to_representation(
+                    field.initial
+                )
+        return res
 
     def validate(self, attrs):
         """Delegate validation to form if it is set"""

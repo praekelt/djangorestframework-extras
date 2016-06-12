@@ -16,8 +16,7 @@ class WithFormForm(forms.ModelForm):
 
 
 class WithFormTrickyForm(forms.ModelForm):
-    #an_integer = forms.IntegerField(initial=1)
-    # fix ^^^
+    an_integer = forms.IntegerField(initial=1)
 
     class Meta:
         model = models.WithTrickyForm
@@ -52,10 +51,10 @@ class WithFormTrickyForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(WithFormTrickyForm, self).save(commit=commit)
-        #instance.another_editable_field = "%s%s" % \
-        #    (instance.another_editable_field + self.cleaned_data["an_integer"])
         instance.another_editable_field = "%s%s" % \
-            (instance.another_editable_field, self.cleaned_data["another_editable_field"])
+            (instance.another_editable_field + self.cleaned_data["an_integer"])
+        #instance.another_editable_field = "%s%s" % \
+        #    (instance.another_editable_field, self.cleaned_data["another_editable_field"])
         instance.save()
         return instance
 
