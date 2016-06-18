@@ -39,6 +39,9 @@ class FormMixin(object):
         admin_klass = getattr(self.Meta, "admin", None)
         admin_site = getattr(self.Meta, "admin_site", None)
         if admin_klass:
+            if not admin_site:
+                # Fall back to default
+                from django.contrib.admin import site as admin_site
             return  admin_klass(self.Meta.model, admin_site).get_form(
                 self.context["request"], self.initial
             )
@@ -64,7 +67,7 @@ class FormMixin(object):
     def get_initial(self):
         form_class = self.form_class
         if not form_class:
-            return super(FormMixin, self).get_initial(attrs)
+            return super(FormMixin, self).get_initial()
 
         # We need a fresh instance to get initial values
         form = form_class(

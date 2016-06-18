@@ -1,6 +1,7 @@
 import multiprocessing
 from setuptools import setup, find_packages
 
+
 setup(
     name="djangorestframework-extras",
     version="0.1",
@@ -13,6 +14,7 @@ setup(
     packages = find_packages(),
     install_requires = [
         "djangorestframework>=3.0",
+        #"six", check if drf already pulls it in
     ],
     include_package_data=True,
     classifiers=[
