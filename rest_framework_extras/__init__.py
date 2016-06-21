@@ -1,10 +1,9 @@
 import types
 import logging
+import re
 from collections import OrderedDict
 
 from django.conf import settings
-
-#from rest_framework import viewsets
 
 from rest_framework_extras.serializers import HyperlinkedModelSerializer
 
@@ -40,10 +39,10 @@ def discover(router, override=None, only=None, exclude=None):
         else:
             pattern_or_name = el
         di = {}
-        if "." in pattern_or_name:
-            app_label, model = pattern_or_name.split(".")
+        try:
+            app_label, model = re.split(r"[\.-]", pattern_or_name)
             di = {"app_label": app_label, "model": model}
-        else:
+        except ValueError:
             di = {"app_label": pattern_or_name}
         for ct in ContentType.objects.filter(**di):
             filters["%s.%s" % (ct.app_label, ct.model)] = {
