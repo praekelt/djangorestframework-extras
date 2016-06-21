@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 from django.conf import settings
 
+from rest_framework.permissions import DjangoModelPermissions
+
 from rest_framework_extras.serializers import HyperlinkedModelSerializer
 
 
@@ -17,6 +19,7 @@ def discover(router, override=None, only=None, exclude=None):
     # Import late because apps may not be loaded yet
     from django.contrib.contenttypes.models import ContentType
     from rest_framework import viewsets
+    from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
     filters = OrderedDict()
 
@@ -79,7 +82,10 @@ def discover(router, override=None, only=None, exclude=None):
             (viewsets.ModelViewSet,),
             {
                 "serializer_class": serializer_klass,
-                "queryset": model.objects.all()
+                "queryset": model.objects.all(),
+                "authentication_classes": (SessionAuthentication, BasicAuthentication),
+                "permission_classes": (DjangoModelPermissions,)
+
             }
         )
         pth = r"%s-%s" % (ct.app_label, ct.model)

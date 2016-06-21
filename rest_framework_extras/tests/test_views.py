@@ -30,6 +30,17 @@ class ViewsTestCase(unittest.TestCase):
         cls.factory = APIRequestFactory()
         cls.client = APIClient()
 
+        # Editor
+        cls.editor = get_user_model().objects.create(
+            username="editor",
+            email="editor@test.com",
+            is_superuser=True,
+            is_staff=True
+        )
+        cls.editor.set_password("password")
+        cls.editor.save()
+        cls.client.login(username="editor", password="password")
+
         cls.bar = models.Bar.objects.create()
 
         cls.vanilla = models.Vanilla.objects.create(
