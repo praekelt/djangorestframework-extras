@@ -14,7 +14,8 @@ logger = logging.getLogger("django")
 
 
 def discover(router, override=None, only=None, exclude=None):
-    """Generate default serializers and viewsets"""
+    """Generate default serializers and viewsets. This function should be run
+    before doing normal registration through the router."""
 
     # Import late because apps may not be loaded yet
     from django.contrib.contenttypes.models import ContentType
@@ -91,3 +92,23 @@ def discover(router, override=None, only=None, exclude=None):
         pth = r"%s-%s" % (ct.app_label, ct.model)
         logger.info("DRFE: registering API url %s" % pth)
         router.register(pth, viewset_klass)
+
+
+def register(router):
+    """Register all viewsets known to djangorestframework-extras, overriding
+    any items already registered with the same name."""
+
+    # Import late because apps may not be loaded yet
+    from rest_framework_extras.users.viewsets import UsersViewSet
+
+    for pth, klass in (("auth-user", UsersViewSet),):
+        keys = [tu[0] for tu in router.registry]
+        try:
+            i = keys.index("auth-user")
+            del router.registry[i]
+        except ValueError:
+            pass
+        router.register(
+            r"%s" % pth,
+            klass,
+        )
