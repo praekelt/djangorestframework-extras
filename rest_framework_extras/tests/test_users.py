@@ -58,6 +58,12 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post("/auth-user/")
         self.assertEqual(response.status_code, 403)
 
+    def test_anonymous_get_user(self):
+        response = self.client.get("/auth-user/")
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get("/auth-user/1/")
+        self.assertEqual(response.status_code, 403)
+
     def test_superuser_create_user(self):
         self.client.login(username="superuser", password="password")
         new_pk = self.user_model.objects.all().last().id + 1
@@ -68,9 +74,115 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.post("/auth-user/", data)
         as_json = json.loads(response.content)
         self.assertEqual(as_json["username"], "tsucu")
+        self.failIf("password" in as_json)
+        query = self.user_model.objects.filter(pk=new_pk)
+        self.assertTrue(query.exists())
+
+        # Password must exist and be hashed
+        obj = query[0]
+        self.assertNotEqual(obj.password, None)
+        self.assertNotEqual(obj.password, "password")
+
+    def test_superuser_get_user(self):
+        self.client.login(username="superuser", password="password")
+        response = self.client.get("/auth-user/")
+        as_json = json.loads(response.content)
+        self.failIf("password" in as_json[0])
+        response = self.client.get("/auth-user/1/")
+        as_json = json.loads(response.content)
+        self.failIf("password" in as_json)
+
+    def test_staff_create_user(self):
+        self.client.login(username="staff", password="password")
+        new_pk = self.user_model.objects.all().last().id + 1
+        data = {
+            "username": "tscu",
+            "password": "password"
+        }
+        response = self.client.post("/auth-user/", data)
+        as_json = json.loads(response.content)
+        self.assertEqual(as_json["username"], "tscu")
+        self.failIf("password" in as_json)
+        query = self.user_model.objects.filter(pk=new_pk)
+        self.assertTrue(query.exists())
+
+        # Password must exist and be hashed
+        obj = query[0]
+        self.assertNotEqual(obj.password, None)
+        self.assertNotEqual(obj.password, "password")
+
+        # Staff can't create superusers. That field is discarded.
+        new_pk = self.user_model.objects.all().last().id + 1
+        data = {
+            "username": "tscu1",
+            "password": "password",
+            "is_superuser": True
+        }
+        response = self.client.post("/auth-user/", data)
+        as_json = json.loads(response.content)
+        self.failIf("is_superuser" in as_json)
         query = self.user_model.objects.filter(pk=new_pk)
         self.assertTrue(query.exists())
         obj = query[0]
-        # Password must exist and be hashed
-        self.assertNotEqual(obj.password, None)
-        self.failIf(obj.password, "password")
+        self.failIf(obj.is_superuser)
+
+    def test_staff_update_user(self):
+        # Staff can't bump users to superuser
+        self.client.login(username="staff", password="password")
+        data = {
+            "is_superuser": True
+        }
+        response = self.client.post("/auth-user/%s/" % self.staff.pk, data)
+        as_json = json.loads(response.content)
+        self.failIf("is_superuser" in as_json)
+        self.failIf(self.user_model.objects.get(pk=self.staff.pk).is_superuser)
+
+    # todo: staff may not edit superuser
+
+    def test_staff_get_user(self):
+        self.client.login(username="staff", password="password")
+        response = self.client.get("/auth-user/")
+        as_json = json.loads(response.content)
+        self.failIf("password" in as_json[0])
+        response = self.client.get("/auth-user/1/")
+        as_json = json.loads(response.content)
+        self.failIf("password" in as_json)
+
+    def test_user_create_user(self):
+        self.client.login(username="user", password="password")
+        data = {
+            "username": "tucu",
+            "password": "password"
+        }
+        response = self.client.post("/auth-user/", data)
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_get_user(self):
+        # User may only get himself
+        self.client.login(username="user", password="password")
+        self.client.login(username="suser", password="password")
+        response = self.client.get("/auth-user/")
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get("/auth-user/%s/" % self.staff.pk)
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get("/auth-user/%s/" % self.user.pk)
+        as_json = json.loads(response.content)
+        self.assertEqual(as_json["username"], self.user.username)
+        self.failIf("password" in as_json)
+
+    def test_user_update_user(self):
+        # User may only update himself
+        self.client.login(username="user", password="password")
+        data = {
+            "email": "user@foo.com"
+        }
+        response = self.client.post("/auth-user/%s/" % self.staff.pk, data)
+        self.assertEqual(response.status_code, 403)
+        response = self.client.post("/auth-user/%s/" % self.user.pk, data)
+        as_json = json.loads(response.content)
+        print as_json
+        self.assertEqual(as_json["email"], "user@foo.com")
+        self.assertEqual(
+            self.user_model.objects.get(pk=self.user.pk).email, "user@foo.com"
+        )
+

@@ -16,6 +16,7 @@ class UserSerializerForSuperUser(serializers.HyperlinkedModelSerializer):
         user = super(UserSerializerForSuperUser, self).create(validated_data)
         if password is not None:
             user.set_password(password)
+            user.save()
         return user
 
     def update(self, instance, validated_data):
@@ -25,6 +26,7 @@ class UserSerializerForSuperUser(serializers.HyperlinkedModelSerializer):
         )
         if password:
             user.set_password(password)
+            user.save()
         return user
 
 
@@ -34,15 +36,15 @@ class UserSerializerForStaff(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ("username", "first_name", "last_name", "email", "is_staff", "password")
-        readonly_fields = ("last_login", "date_joined", "is_active")
+        readonly_fields = ("last_login", "date_joined", "is_active", "is_superuser")
         write_only_fields = ("password",)
 
     def create(self, validated_data):
-        import pdb;pdb.set_trace()
         password = validated_data.pop("password", None)
         user = super(UserSerializerForStaff, self).create(validated_data)
         if password is not None:
             user.set_password(password)
+            user.save()
         return user
 
     def update(self, instance, validated_data):
@@ -52,6 +54,7 @@ class UserSerializerForStaff(serializers.HyperlinkedModelSerializer):
         )
         if password:
             user.set_password(password)
+            user.save()
         return user
 
 
@@ -65,6 +68,7 @@ class UserSerializerForUser(serializers.HyperlinkedModelSerializer):
         write_only_fields = ("password",)
 
     def update(self, instance, validated_data):
+        import pdb;pdb.set_trace() 
         password = validated_data.pop("password", None)
         user = super(UserSerializerForUser, self).update(
             instance, validated_data
