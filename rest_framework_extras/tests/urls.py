@@ -4,13 +4,12 @@ from django.conf import settings
 
 from rest_framework import routers
 
-from rest_framework_extras import discover
+from rest_framework_extras import discover, register
 from rest_framework_extras.tests import forms
 
 
 router = routers.SimpleRouter()
 
-#router.register(r"manufacturers", ManufacturerViewSet)
 discover(router,
     override=[
         ("tests.withform", dict(form=forms.WithFormForm)),
@@ -18,6 +17,7 @@ discover(router,
         #("tests.shoo", dict(admin=ModelBaseAdmin, admin_site=admin.site)),
     ],
 )
+register(router)
 
 urlpatterns = [
     url(r"^", include(router.urls)),
