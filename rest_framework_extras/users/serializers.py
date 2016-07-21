@@ -68,7 +68,6 @@ class UserSerializerForUser(serializers.HyperlinkedModelSerializer):
         write_only_fields = ("password",)
 
     def update(self, instance, validated_data):
-        import pdb;pdb.set_trace() 
         password = validated_data.pop("password", None)
         user = super(UserSerializerForUser, self).update(
             instance, validated_data
