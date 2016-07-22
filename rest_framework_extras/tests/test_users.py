@@ -137,7 +137,18 @@ class UsersTestCase(unittest.TestCase):
         self.failIf("is_superuser" in as_json)
         self.failIf(self.user_model.objects.get(pk=self.staff.pk).is_superuser)
 
-    # todo: staff may not edit superuser
+    def test_staff_update_superuser(self):
+        # Staff can't edit superusers
+        self.client.login(username="staff", password="password")
+        data = {
+            "email": "superuser@foo.com"
+        }
+        response = self.client.patch("/auth-user/%s/" % self.superuser.pk, data)
+        self.assertEqual(response.status_code, 403)
+        self.assertNotEqual(
+            self.user_model.objects.get(pk=self.superuser.pk).email,
+            "superuser@foo.com"
+        )
 
     def test_staff_get_user(self):
         self.client.login(username="staff", password="password")
@@ -160,7 +171,6 @@ class UsersTestCase(unittest.TestCase):
     def test_user_get_user(self):
         # User may only get himself
         self.client.login(username="user", password="password")
-        self.client.login(username="suser", password="password")
         response = self.client.get("/auth-user/")
         self.assertEqual(response.status_code, 403)
         response = self.client.get("/auth-user/%s/" % self.staff.pk)
