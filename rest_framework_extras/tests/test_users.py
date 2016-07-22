@@ -185,3 +185,17 @@ class UsersTestCase(unittest.TestCase):
             self.user_model.objects.get(pk=self.user.pk).email, "user@foo.com"
         )
 
+        # User may not bump himself to superuser or staff
+        data = {
+            "is_superuser": True
+        }
+        response = self.client.patch("/auth-user/%s/" % self.user.pk, data)
+        as_json = json.loads(response.content)
+        self.failIf("is_superuser" in as_json)
+        self.failIf(self.user_model.objects.get(pk=self.user.pk).is_superuser)
+        data = {
+            "is_staff": True
+        }
+        response = self.client.patch("/auth-user/%s/" % self.user.pk, data)
+        self.failIf("is_staff" in as_json)
+        self.failIf(self.user_model.objects.get(pk=self.user.pk).is_staff)
