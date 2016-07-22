@@ -132,7 +132,7 @@ class UsersTestCase(unittest.TestCase):
         data = {
             "is_superuser": True
         }
-        response = self.client.post("/auth-user/%s/" % self.staff.pk, data)
+        response = self.client.patch("/auth-user/%s/" % self.staff.pk, data)
         as_json = json.loads(response.content)
         self.failIf("is_superuser" in as_json)
         self.failIf(self.user_model.objects.get(pk=self.staff.pk).is_superuser)
@@ -176,11 +176,10 @@ class UsersTestCase(unittest.TestCase):
         data = {
             "email": "user@foo.com"
         }
-        response = self.client.post("/auth-user/%s/" % self.staff.pk, data)
+        response = self.client.patch("/auth-user/%s/" % self.staff.pk, data)
         self.assertEqual(response.status_code, 403)
-        response = self.client.post("/auth-user/%s/" % self.user.pk, data)
+        response = self.client.patch("/auth-user/%s/" % self.user.pk, data)
         as_json = json.loads(response.content)
-        print as_json
         self.assertEqual(as_json["email"], "user@foo.com")
         self.assertEqual(
             self.user_model.objects.get(pk=self.user.pk).email, "user@foo.com"
