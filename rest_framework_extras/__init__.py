@@ -3,6 +3,7 @@ import logging
 import re
 from collections import OrderedDict
 
+from django.db.utils import OperationalError
 from django.conf import settings
 
 from rest_framework.permissions import DjangoModelPermissions
@@ -21,6 +22,12 @@ def discover(router, override=None, only=None, exclude=None):
     from django.contrib.contenttypes.models import ContentType
     from rest_framework import viewsets
     from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
+    # Upon first migrate the contenttypes have not been loaded yet
+    try:
+        list(ContentType.objects.all())
+    except OperationalError:
+        return
 
     filters = OrderedDict()
 
