@@ -101,21 +101,33 @@ def discover(router, override=None, only=None, exclude=None):
         router.register(pth, viewset_klass)
 
 
-def register(router):
-    """Register all viewsets known to djangorestframework-extras, overriding
-    any items already registered with the same name."""
+def register(router, mapping=None):
+    """Register all viewsets known to app, overriding any items already
+    registered with the same name."""
 
     # Import late because apps may not be loaded yet
     from rest_framework_extras.users.viewsets import UsersViewSet
 
-    for pth, klass in (("auth-user", UsersViewSet),):
+    if mapping is None:
+        mapping =  (
+            ("auth-user", UsersViewSet),
+        )
+
+    for pth, klass in mapping:
         keys = [tu[0] for tu in router.registry]
         try:
-            i = keys.index("auth-user")
+            i = keys.index(pth)
             del router.registry[i]
         except ValueError:
             pass
+        # Leave default handling intact until view_name issues are resolved
+        router.register(
+            r"%s" % pth,
+            klass
+        )
+        # Provide a base_name to consider app_label as well
         router.register(
             r"%s" % pth,
             klass,
+            base_name=pth
         )
