@@ -11,3 +11,4 @@ dist/
 *.egg
 ve/
 layers.db
+.tox/
