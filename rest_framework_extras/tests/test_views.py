@@ -18,7 +18,7 @@ def get_control(model="vanilla", pk=1, another_editable_field_suffix=""):
         u"another_editable_field": u"another_editable_field%s" \
             % another_editable_field_suffix,
         u"many_field": [u"http://testserver/tests-bar/1/"],
-        u"foreign_field": u"http://testserver/tests-bar/1/",
+        u"foreign_field": u"http://testserver/tests-foo/1/",
         u"non_editable_field": u""
      }
 
@@ -42,11 +42,12 @@ class ViewsTestCase(unittest.TestCase):
         cls.client.login(username="editor", password="password")
 
         cls.bar = models.Bar.objects.create()
+        cls.foo = models.Foo.objects.create()
 
         cls.vanilla = models.Vanilla.objects.create(
             editable_field="editable_field",
             another_editable_field="another_editable_field",
-            foreign_field=cls.bar
+            foreign_field=cls.foo
         )
         cls.vanilla.many_field = [cls.bar]
         cls.vanilla.save()
@@ -54,7 +55,7 @@ class ViewsTestCase(unittest.TestCase):
         cls.with_form = models.WithForm.objects.create(
             editable_field="editable_field",
             another_editable_field="another_editable_field",
-            foreign_field=cls.bar
+            foreign_field=cls.foo
         )
         cls.with_form.many_field = [cls.bar]
         cls.with_form.save()
@@ -62,7 +63,7 @@ class ViewsTestCase(unittest.TestCase):
         cls.with_tricky_form = models.WithTrickyForm.objects.create(
             editable_field="editable_field",
             another_editable_field="another_editable_field",
-            foreign_field=cls.bar
+            foreign_field=cls.foo
         )
         cls.with_tricky_form.many_field = [cls.bar]
         cls.with_tricky_form.save()
@@ -82,7 +83,7 @@ class ViewsTestCase(unittest.TestCase):
         data = {
             "editable_field": "editable_field",
             "another_editable_field": "another_editable_field",
-            "foreign_field": "http://testserver/tests-bar/1/",
+            "foreign_field": "http://testserver/tests-foo/1/",
             "many_field": ["http://testserver/tests-bar/1/"],
         }
         response = self.client.post("/tests-vanilla/", data)
@@ -120,7 +121,7 @@ class ViewsTestCase(unittest.TestCase):
         data = {
             "editable_field": "editable_field",
             "another_editable_field": "another_editable_field",
-            "foreign_field": "http://testserver/tests-bar/1/",
+            "foreign_field": "http://testserver/tests-foo/1/",
             "many_field": ["http://testserver/tests-bar/1/"],
         }
         response = self.client.post("/tests-withform/", data)
@@ -154,7 +155,7 @@ class ViewsTestCase(unittest.TestCase):
         data = {
             "editable_field": "editable_field",
             "another_editable_field": "another_editable_field",
-            "foreign_field": "http://testserver/tests-bar/1/",
+            "foreign_field": "http://testserver/tests-foo/1/",
             "many_field": ["http://testserver/tests-bar/1/"],
             "an_integer": 777,
         }
