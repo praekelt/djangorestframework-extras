@@ -14,6 +14,14 @@ from rest_framework_extras.serializers import HyperlinkedModelSerializer
 logger = logging.getLogger("django")
 
 
+SETTINGS = getattr(settings, "REST_FRAMEWORK_EXTRAS", {
+    "blacklist": {
+        "sessions-session": {},
+        "admin-logentry": {}
+    }
+})
+
+
 def discover(router, override=None, only=None, exclude=None):
     """Generate default serializers and viewsets. This function should be run
     before doing normal registration through the router."""
@@ -68,12 +76,21 @@ def discover(router, override=None, only=None, exclude=None):
 
     for di in filters.values():
         ct = di["content_type"]
+        pth = r"%s-%s" % (ct.app_label, ct.model)
+
+        # Skip over blacklisted app_label / model pairs
+        if pth in SETTINGS["blacklist"]:
+            continue
+
         form = di.pop("form", None)
         admin = di.pop("admin", None)
         admin_site = di.pop("admin_site", None)
         model = ct.model_class()
+
+        # We can't handle a model without a manager
         if not hasattr(model, "objects"):
             continue
+
         prefix = "%s%s" % (ct.app_label.capitalize(), model.__name__)
         serializer_klass = type(
             str("%sSerializer" % prefix),
@@ -96,7 +113,6 @@ def discover(router, override=None, only=None, exclude=None):
 
             }
         )
-        pth = r"%s-%s" % (ct.app_label, ct.model)
         logger.info("DRFE: registering API url %s" % pth)
         router.register(pth, viewset_klass)
 

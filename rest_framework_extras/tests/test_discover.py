@@ -2,6 +2,8 @@ import unittest
 
 from django.core.urlresolvers import reverse
 
+from rest_framework_extras import SETTINGS
+
 
 class DiscoverTestCase(unittest.TestCase):
 
@@ -25,3 +27,11 @@ class DiscoverTestCase(unittest.TestCase):
 
         if n != 4:
             self.fail("Found %s of 4 items in router registry" % n)
+
+    def test_blacklist(self):
+        # Must import late
+        from rest_framework_extras.tests.urls import router
+
+        for name, klass, model_name in router.registry:
+            self.failIf(name in SETTINGS["blacklist"])
+
