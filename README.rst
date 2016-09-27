@@ -42,33 +42,29 @@ User permissions and the custom UsersViewSet
 
 ``djangorestframework-extras`` provides a custom ViewSet ``UsersViewSet`` with serializers and permissions for the default user, the staff user and the superuser.
 
-Register UsersViewSet through the DefaultRouter:
+Register UsersViewSet through the DefaultRouter::
 
-```python
-from rest_framework_extras.users.viewsets import UsersViewSet
+    from rest_framework_extras.users.viewsets import UsersViewSet
 
-router = routers.DefaultRouter()
+    router = routers.DefaultRouter()
 
-router.register(r'users', UsersViewSet, 'user')
-```
+    router.register(r'users', UsersViewSet, 'user')
 
 Discovery and registration of ViewSets
 --------------------------------------
 
-Enable discovery and registration of default serializers and viewsets by adding the following to ``urls.py``:
+Enable discovery and registration of default serializers and viewsets by adding the following to ``urls.py``::
 
-```python
-from rest_framework import routers
-import rest_framework_extras
-router = routers.DefaultRouter()
+    from rest_framework import routers
+    import rest_framework_extras
+    router = routers.DefaultRouter()
 
-rest_framework_extras.discover(router)
-rest_framework_extras.register(router)
+    rest_framework_extras.discover(router)
+    rest_framework_extras.register(router)
 
-urlpatterns = [
-    url(r"^api/(?P<version>(v1))/", include(router.urls))
-]
-```
+    urlpatterns = [
+        url(r"^api/(?P<version>(v1))/", include(router.urls))
+    ]
 
 **Going through the code line by line:**
 
@@ -80,26 +76,20 @@ urlpatterns = [
 Tips
 ====
 
-To change the name of the register user model change the ``mapping`` parameter, such as:
+To change the name of the register user model change the ``mapping`` parameter, such as::
 
-```python
-rest_framework_extras.register(router, mapping=(("user", UsersViewSet),))
-```
+    rest_framework_extras.register(router, mapping=(("user", UsersViewSet),))
 
-To discover only specific models define a comma separated list with the ``only`` parameter, such as:
+To discover only specific models define a comma separated list with the ``only`` parameter, such as::
 
-```python
-rest_framework_extras.discover(router, only=["auth-user", "auth-permission"])
-```
+    rest_framework_extras.discover(router, only=["auth-user", "auth-permission"])
 
 Unit Testing
 ============
 
-To run tests use the following command:
+To run tests use the following command::
 
-```python
-python manage.py test rest_framework_extras.tests --settings=rest_framework_extras.tests.settings.19
-```
+    python manage.py test rest_framework_extras.tests --settings=rest_framework_extras.tests.settings.19
 
 License
 =======
