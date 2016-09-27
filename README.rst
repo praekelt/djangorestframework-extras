@@ -16,7 +16,7 @@ Prerequisite
 ============
 #. pip install ``djangorestframework``
 
-#. Add ``rest_framework`` to your ``INSTALLED_APPSRestFul setting in ``settings.py``.
+#. Add ``rest_framework`` to your ``INSTALLED_APPS`` setting in ``settings.py``.
 
 
 Installation
