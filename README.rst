@@ -2,8 +2,8 @@ Django Rest Framework Extras
 ############################
 .. image:: https://travis-ci.org/praekelt/djangorestframework-extras.svg?branch=develop
     :target: https://travis-ci.org/praekelt/djangorestframework-extras?branch=develop
-.. image:: https://coveralls.io/repos/github/praekelt/djangorestframework-extras/badge.svg?branch=develop
-    :target: https://coveralls.io/github/praekelt/djangorestframework-extras?branch=develop
+.. image:: https://coveralls.io/repos/github/praekelt/djangorestframework-extras/badge.svg
+    :target: https://coveralls.io/github/praekelt/djangorestframework-extras
 
 **DRFE generates RESTful API's for any Django models.**
 
