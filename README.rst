@@ -2,12 +2,13 @@ Django Rest Framework Extras
 ============================
 **Django Rest Framework Extras provide a number of features to help automate API creation.**
 
-.. figure:: https://travis-ci.org/praekelt/djangorestframework-extras.svg?branch=develop
-   :align: center
-   :alt: Travis
 
-.. contents:: Contents
-    :depth: 5
+.. figure:: https://travis-ci.org/praekelt/djangorestframework-extras.svg?branch=develop
+    :class: center
+    :alt: Travis
+
+.. contents:: Table of Contents
+    :depth: 3
 
 Prerequisite
 ============
