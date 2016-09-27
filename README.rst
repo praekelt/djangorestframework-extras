@@ -27,8 +27,8 @@ Installation
 Features List
 =============
 
-- Generating default serializers and viewsets.
-- Registering all viewsets known to application.
+- Generating default serializers and viewsets for a.
+- Registering all viewsets known to the application in a w.
 - Custom serializers and permissions for default user, staff users and superusers.
 - Custom relaxed HyperlinkedRelatedField and Serializer
 - FormMixin: Delegates validation to a normal Django form
@@ -76,11 +76,11 @@ Enable discovery and registration of default serializers and viewsets by adding 
 Tips
 ====
 
-To change the name of the register user model change the ``mapping`` parameter, such as::
+Change the name of the registered user model by changing the ``mapping`` parameter, such as::
 
     rest_framework_extras.register(router, mapping=(("user", UsersViewSet),))
 
-To discover only specific models define a comma separated list with the ``only`` parameter, such as::
+Discover only specified models by defining a comma separated list with the ``only`` parameter, such as::
 
     rest_framework_extras.discover(router, only=["auth-user", "auth-permission"])
 
