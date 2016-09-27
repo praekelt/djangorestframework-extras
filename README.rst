@@ -4,11 +4,11 @@ Django Rest Framework Extras
 
 
 .. figure:: https://travis-ci.org/praekelt/djangorestframework-extras.svg?branch=develop
-    :class: center
-    :alt: Travis
+   :align: center
+   :alt: Travis
 
 .. contents:: Table of Contents
-    :depth: 3
+   :depth: 1
 
 Prerequisite
 ============
@@ -28,11 +28,11 @@ Installation
 Features List
 =============
 
-- Generating default serializers and viewsets for a.
-- Registering all viewsets known to the application in a w.
-- Custom serializers and permissions for default user, staff users and superusers.
-- Custom relaxed HyperlinkedRelatedField and Serializer
-- FormMixin: Delegates validation to a normal Django form
+- Generating default serializers and viewsets for all known applications.
+- Registering all viewsets known to the application with the Django Rest Framework router.
+- Custom serializers and permissions for the default user, the staff users and superusers.
+- Custom FormMixin that Delegates validation to a normal Django form.
+- Custom Hyperlink fields and serializer, ``HyperlinkedRelatedField`` and ``HyperlinkedModelSerializer``
 
 
 Usage
@@ -69,10 +69,24 @@ Enable discovery and registration of default serializers and viewsets by adding 
 
 **Going through the code line by line:**
 
-#. Line 1 & 3: The router and DefaultRouter classes connects the views and urls automatically and also creates the API root for us.
-#. Line 5: The discover function generates default serializers and viewsets. This function should be run before normal registration.
-#. Line 6: The new register function registers all viewsets overriding any items already registered with the same name.
+#. Line 1 & 3: The router and DefaultRouter classes connects the views and urls automatically and also creates the API root.
+#. Line 5: The new discover function generates default serializers and viewsets. This function should be run before normal registration.
+#. Line 6: The new register function registers all viewsets (including the UsersViewSet), overriding any items already registered with the same name.
 #. Line 9: Define the urls by including router.urls.
+
+Available Settings
+------------------
+
+``REST_FRAMEWORK_EXTRAS``
+
+**blacklist**: A dictionary of the models to blacklist. By default the following models are blacklisted::
+
+   "REST_FRAMEWORK_EXTRAS", {
+      "blacklist": {
+           "sessions-session": {},
+           "admin-logentry": {}
+      }
+   }
 
 Tips
 ====
@@ -81,7 +95,7 @@ Change the name of the registered user model by changing the ``mapping`` paramet
 
     rest_framework_extras.register(router, mapping=(("user", UsersViewSet),))
 
-Discover only specified models by defining a comma separated list with the ``only`` parameter, such as::
+Restrict models that will be displayed through the Django Rest Framework by using the ``only`` and ``overwrite`` parameters. Define a comma separated list, such as::
 
     rest_framework_extras.discover(router, only=["auth-user", "auth-permission"])
 
