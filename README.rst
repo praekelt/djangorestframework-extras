@@ -1,11 +1,15 @@
 Django Rest Framework Extras
 ============================
-**Django Rest Framework Extras provide a number of features to help automate API creation.**
+**DRFE generates RESTful API's for any Django models.**
 
 
 .. figure:: https://travis-ci.org/praekelt/djangorestframework-extras.svg?branch=develop
-   :align: center
+   :class: center
    :alt: Travis
+
+.. image:: https://coveralls.io/repos/github/praekelt/djangorestframework-extras/badge.svg?branch=develop
+   :target: https://coveralls.io/github/praekelt/djangorestframework-extras?branch=develop
+
 
 .. contents:: Table of Contents
    :depth: 1
@@ -14,7 +18,7 @@ Prerequisite
 ============
 #. pip install ``djangorestframework``
 
-#. Add ``rest_framework`` to your ``INSTALLED_APPS`` setting.
+#. Add ``rest_framework`` to your ``INSTALLED_APPSRestFul setting in ``settings.py``.
 
 
 Installation
@@ -22,13 +26,13 @@ Installation
 
 #. Install or add ``djangorestframework-extras`` to your Python path.
 
-#. Add ``rest_framework_extras`` to your ``INSTALLED_APPS`` setting.
+#. Add ``rest_framework_extras`` to your ``INSTALLED_APPS`` setting in ``settings.py``.
 
 
-Features List
-=============
+Feature List
+============
 
-- Generating default serializers and viewsets for all known applications.
+- Generating default serializers and viewsets for all known applications to create RESTful API's.
 - Registering all viewsets known to the application with the Django Rest Framework router.
 - Custom serializers and permissions for the default user, the staff users and superusers.
 - Custom FormMixin that Delegates validation to a normal Django form.
@@ -81,7 +85,7 @@ Available Settings
 
 **blacklist**: A dictionary of the models to blacklist. By default the following models are blacklisted::
 
-   "REST_FRAMEWORK_EXTRAS", {
+   "REST_FRAMEWORK_EXTRAS": {
       "blacklist": {
            "sessions-session": {},
            "admin-logentry": {}
@@ -102,7 +106,7 @@ Restrict models that will be displayed through the Django Rest Framework by usin
 Unit Testing
 ============
 
-To run tests use the following command::
+Run tests by using the following command::
 
     python manage.py test rest_framework_extras.tests --settings=rest_framework_extras.tests.settings.19
 
