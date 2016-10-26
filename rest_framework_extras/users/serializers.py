@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 from rest_framework import fields
@@ -8,7 +8,7 @@ class UserSerializerForSuperUser(serializers.HyperlinkedModelSerializer):
     password = fields.CharField(allow_blank=True, write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         write_only_fields = ("password",)
 
     def create(self, validated_data):
@@ -34,7 +34,7 @@ class UserSerializerForStaff(serializers.HyperlinkedModelSerializer):
     password = fields.CharField(allow_blank=True, write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ("username", "first_name", "last_name", "email", "is_staff", "password")
         readonly_fields = ("last_login", "date_joined", "is_active", "is_superuser")
         write_only_fields = ("password",)
@@ -62,7 +62,7 @@ class UserSerializerForUser(serializers.HyperlinkedModelSerializer):
     password = fields.CharField(allow_blank=True, write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ("username", "first_name", "last_name", "email", "password")
         readonly_fields = ("last_login", "date_joined", "is_active")
         write_only_fields = ("password",)
