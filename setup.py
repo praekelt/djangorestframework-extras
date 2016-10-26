@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name="djangorestframework-extras",
     version="0.1",
-    description="",
+    description="Autogenerate API's for models. Expose core Django functionality. Validate against existing forms.",
     long_description = open("README.rst", "r").read(),
     author="Praekelt Consulting",
     author_email="dev@praekelt.com",
