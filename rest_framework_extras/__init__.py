@@ -43,7 +43,7 @@ def discover(router, override=None, only=None, exclude=None):
     try:
         list(ContentType.objects.all())
     except (OperationalError, ProgrammingError):
-        return
+        return False
 
     filters = OrderedDict()
 
@@ -123,6 +123,7 @@ def discover(router, override=None, only=None, exclude=None):
         )
         logger.info("DRFE: registering API url %s" % pth)
         router.register(pth, viewset_klass)
+    return True
 
 
 def register(router, mapping=None):
