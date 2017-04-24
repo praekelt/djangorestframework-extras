@@ -1,6 +1,5 @@
 import logging
 import re
-import types
 from collections import OrderedDict
 
 from django.conf import settings
@@ -56,13 +55,13 @@ def discover(router, override=None, only=None, exclude=None):
     # Parse the setting
     for el in ((only or []) or (override or [])):
         pattern_or_name = form = admin = admin_site = None
-        if isinstance(el, (types.ListType, types.TupleType)):
+        if isinstance(el, (list, tuple)):
             pattern_or_name, di = el
             form = di.get("form", None)
             admin = di.get("admin", None)
             admin_site = di.get("admin_site", None)
             if any((admin, admin_site)) and not all((admin, admin_site)):
-                raise RuntimeError, "admin and admin_site are mutually inclusive"
+                raise RuntimeError("admin and admin_site are mutually inclusive")
         else:
             pattern_or_name = el
         di = {}
