@@ -1,4 +1,3 @@
-import types
 import logging
 from collections import OrderedDict
 
@@ -91,7 +90,7 @@ class FormMixin(object):
 
         # Convert any objects to primary keys
         for key, value in attrs.items():
-            if isinstance(value, types.ListType):
+            if isinstance(value, list):
                 attrs[key] = [getattr(v, "pk", v) for v in value]
             elif hasattr(value, "pk"):
                 attrs[key] = value.pk
@@ -115,14 +114,18 @@ form %s. You may encounter problems.""" % \
                     (self.__class__.__name__, form_class.__name__)
                 )
 
+                to_delete_keys = []
                 for k, v in form.errors.items():
                     # This string matching is ugly but our only option
                     if v == [_("This field is required.")]:
-                        del form.errors[k]
-                        del form.fields[k]
+                        to_delete_keys.append(k)
                         exclude = list(getattr(form.Meta, "exclude", []))
                         exclude.append(k)
                         setattr(form.Meta, "exclude", exclude)
+
+                for k in to_delete_keys:
+                    del form.errors[k]
+                    del form.fields[k]
 
             # Map global error
             if "__all__" in form.errors:
@@ -141,7 +144,7 @@ form %s. You may encounter problems.""" % \
 
         try:
             self.instance = form.save()
-        except Exception, exc:
+        except Exception as exc:
             if self.context["request"].method.lower() == "patch":
                 raise """DRFE: save failed with %s. This may be because \
  request was a PATCH.""" % exc

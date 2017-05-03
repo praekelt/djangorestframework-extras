@@ -72,7 +72,7 @@ class UsersTestCase(unittest.TestCase):
             "password": "password"
         }
         response = self.client.post("/auth-user/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["username"], "tsucu")
         self.failIf("password" in as_json)
         query = self.user_model.objects.filter(pk=new_pk)
@@ -86,10 +86,10 @@ class UsersTestCase(unittest.TestCase):
     def test_superuser_get_user(self):
         self.client.login(username="superuser", password="password")
         response = self.client.get("/auth-user/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("password" in as_json[0])
         response = self.client.get("/auth-user/1/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("password" in as_json)
 
     def test_staff_create_user(self):
@@ -100,7 +100,7 @@ class UsersTestCase(unittest.TestCase):
             "password": "password"
         }
         response = self.client.post("/auth-user/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["username"], "tscu")
         self.failIf("password" in as_json)
         query = self.user_model.objects.filter(pk=new_pk)
@@ -119,7 +119,7 @@ class UsersTestCase(unittest.TestCase):
             "is_superuser": True
         }
         response = self.client.post("/auth-user/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("is_superuser" in as_json)
         query = self.user_model.objects.filter(pk=new_pk)
         self.assertTrue(query.exists())
@@ -133,7 +133,7 @@ class UsersTestCase(unittest.TestCase):
             "is_superuser": True
         }
         response = self.client.patch("/auth-user/%s/" % self.staff.pk, data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("is_superuser" in as_json)
         self.failIf(self.user_model.objects.get(pk=self.staff.pk).is_superuser)
 
@@ -153,10 +153,10 @@ class UsersTestCase(unittest.TestCase):
     def test_staff_get_user(self):
         self.client.login(username="staff", password="password")
         response = self.client.get("/auth-user/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("password" in as_json[0])
         response = self.client.get("/auth-user/1/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("password" in as_json)
 
     def test_user_create_user(self):
@@ -176,7 +176,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.get("/auth-user/%s/" % self.staff.pk)
         self.assertEqual(response.status_code, 403)
         response = self.client.get("/auth-user/%s/" % self.user.pk)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["username"], self.user.username)
         self.failIf("password" in as_json)
 
@@ -189,7 +189,7 @@ class UsersTestCase(unittest.TestCase):
         response = self.client.patch("/auth-user/%s/" % self.staff.pk, data)
         self.assertEqual(response.status_code, 403)
         response = self.client.patch("/auth-user/%s/" % self.user.pk, data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["email"], "user@foo.com")
         self.assertEqual(
             self.user_model.objects.get(pk=self.user.pk).email, "user@foo.com"
@@ -200,7 +200,7 @@ class UsersTestCase(unittest.TestCase):
             "is_superuser": True
         }
         response = self.client.patch("/auth-user/%s/" % self.user.pk, data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.failIf("is_superuser" in as_json)
         self.failIf(self.user_model.objects.get(pk=self.user.pk).is_superuser)
         data = {

@@ -70,12 +70,12 @@ class ViewsTestCase(unittest.TestCase):
 
     def test_vanilla_list(self):
         response = self.client.get("/tests-vanilla/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json[0], get_control())
 
     def test_vanilla_get(self):
         response = self.client.get("/tests-vanilla/%s/" % self.vanilla.pk)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json, get_control())
 
     def test_vanilla_create(self):
@@ -87,7 +87,7 @@ class ViewsTestCase(unittest.TestCase):
             "many_field": ["http://testserver/tests-bar/1/"],
         }
         response = self.client.post("/tests-vanilla/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json, get_control(pk=new_pk))
         self.assertTrue(models.Vanilla.objects.filter(pk=new_pk).exists())
 
@@ -99,7 +99,7 @@ class ViewsTestCase(unittest.TestCase):
             "/tests-vanilla/%s/" % self.vanilla.pk,
             data,
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["editable_field"], "editable_field_x")
         self.assertEqual(
             models.Vanilla.objects.get(pk=self.vanilla.pk).editable_field,
@@ -108,12 +108,12 @@ class ViewsTestCase(unittest.TestCase):
 
     def test_with_form_list(self):
         response = self.client.get("/tests-withform/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json[0], get_control(model="withform"))
 
     def test_with_form_get(self):
         response = self.client.get("/tests-withform/%s/" % self.with_form.pk)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json, get_control(model="withform"))
 
     def test_with_form_create(self):
@@ -125,7 +125,7 @@ class ViewsTestCase(unittest.TestCase):
             "many_field": ["http://testserver/tests-bar/1/"],
         }
         response = self.client.post("/tests-withform/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json, get_control(model="withform", pk=new_pk))
         self.assertTrue(models.WithForm.objects.filter(pk=new_pk).exists())
 
@@ -137,7 +137,7 @@ class ViewsTestCase(unittest.TestCase):
             "/tests-withform/%s/" % self.vanilla.pk,
             data,
         )
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json["editable_field"], "editable_field_x")
         self.assertEqual(
             models.WithForm.objects.get(pk=self.with_form.pk).editable_field,
@@ -146,7 +146,7 @@ class ViewsTestCase(unittest.TestCase):
 
     def test_with_tricky_form_list(self):
         response = self.client.get("/tests-withtrickyform/")
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json[0], get_control(model="withtrickyform"))
 
     def test_with_tricky_form_create(self):
@@ -160,5 +160,5 @@ class ViewsTestCase(unittest.TestCase):
             "an_integer": 777,
         }
         response = self.client.post("/tests-withtrickyform/", data)
-        as_json = json.loads(response.content)
+        as_json = response.json()
         self.assertEqual(as_json, {u"an_integer": [u"This field is required."]})

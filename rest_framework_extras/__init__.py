@@ -1,10 +1,9 @@
-import types
 import logging
 import re
 from collections import OrderedDict
 
-from django.db.utils import OperationalError, ProgrammingError
 from django.conf import settings
+from django.db.utils import OperationalError, ProgrammingError
 
 from rest_framework.permissions import DjangoModelPermissions
 
@@ -14,12 +13,21 @@ from rest_framework_extras.serializers import HyperlinkedModelSerializer
 logger = logging.getLogger("django")
 
 
-SETTINGS = getattr(settings, "REST_FRAMEWORK_EXTRAS", {
-    "blacklist": {
-        "sessions-session": {},
-        "admin-logentry": {}
-    }
-})
+def get_settings():
+    """Due to app loading issues during startup provide a function to return
+    settings only when needed."""
+
+    # Import late because apps may not be loaded yet
+    from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
+    return getattr(settings, "REST_FRAMEWORK_EXTRAS", {
+        "blacklist": {
+            "sessions-session": {},
+            "admin-logentry": {},
+        },
+        "authentication-classes": (SessionAuthentication, BasicAuthentication),
+        "permission-classes": (DjangoModelPermissions,)
+    })
 
 
 def discover(router, override=None, only=None, exclude=None):
@@ -29,13 +37,12 @@ def discover(router, override=None, only=None, exclude=None):
     # Import late because apps may not be loaded yet
     from django.contrib.contenttypes.models import ContentType
     from rest_framework import viewsets
-    from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
     # Upon first migrate the contenttypes have not been loaded yet
     try:
         list(ContentType.objects.all())
     except (OperationalError, ProgrammingError):
-        return
+        return False
 
     filters = OrderedDict()
 
@@ -48,13 +55,13 @@ def discover(router, override=None, only=None, exclude=None):
     # Parse the setting
     for el in ((only or []) or (override or [])):
         pattern_or_name = form = admin = admin_site = None
-        if isinstance(el, (types.ListType, types.TupleType)):
+        if isinstance(el, (list, tuple)):
             pattern_or_name, di = el
             form = di.get("form", None)
             admin = di.get("admin", None)
             admin_site = di.get("admin_site", None)
             if any((admin, admin_site)) and not all((admin, admin_site)):
-                raise RuntimeError, "admin and admin_site are mutually inclusive"
+                raise RuntimeError("admin and admin_site are mutually inclusive")
         else:
             pattern_or_name = el
         di = {}
@@ -74,6 +81,7 @@ def discover(router, override=None, only=None, exclude=None):
     if exclude is not None:
         raise NotImplementedError
 
+    SETTINGS = get_settings()
     for di in filters.values():
         ct = di["content_type"]
         pth = r"%s-%s" % (ct.app_label, ct.model)
@@ -108,13 +116,13 @@ def discover(router, override=None, only=None, exclude=None):
             {
                 "serializer_class": serializer_klass,
                 "queryset": model.objects.all(),
-                "authentication_classes": (SessionAuthentication, BasicAuthentication),
-                "permission_classes": (DjangoModelPermissions,)
-
+                "authentication_classes": SETTINGS["authentication-classes"],
+                "permission_classes": SETTINGS["permission-classes"]
             }
         )
         logger.info("DRFE: registering API url %s" % pth)
         router.register(pth, viewset_klass)
+    return True
 
 
 def register(router, mapping=None):

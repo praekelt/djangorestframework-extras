@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="djangorestframework-extras",
-    version="0.1",
-    description="",
+    version="0.2",
+    description="Autogenerate API's for models. Expose core Django functionality. Validate against existing forms.",
     long_description = open("README.rst", "r").read(),
     author="Praekelt Consulting",
     author_email="dev@praekelt.com",
@@ -14,7 +14,6 @@ setup(
     packages = find_packages(),
     install_requires = [
         "djangorestframework>=3.0",
-        #"six", check if drf already pulls it in
     ],
     include_package_data=True,
     classifiers=[

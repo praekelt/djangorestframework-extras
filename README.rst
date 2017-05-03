@@ -5,7 +5,7 @@ Django Rest Framework Extras
 .. image:: https://coveralls.io/repos/github/praekelt/djangorestframework-extras/badge.svg
     :target: https://coveralls.io/github/praekelt/djangorestframework-extras
 
-**DRFE generates RESTful API's for any Django models.**
+**DRFE generates RESTful API's for any Django models. It builds on Django Rest Framework.**
 
 .. contents:: Table of Contents
    :depth: 1
@@ -85,7 +85,9 @@ Available Settings
       "blacklist": {
            "sessions-session": {},
            "admin-logentry": {}
-      }
+      },
+      "authentication-classes": (SessionAuthentication, BasicAuthentication),
+      "permission-classes": (DjangoModelPermissions,)
    }
 
 Tips
@@ -95,9 +97,11 @@ Change the name of the registered user model by changing the ``mapping`` paramet
 
     rest_framework_extras.register(router, mapping=(("user", UsersViewSet),))
 
-Restrict models that will be displayed through the Django Rest Framework by using the ``only`` and ``overwrite`` parameters. Define a comma separated list, such as::
+Restrict models that will be displayed through the Django Rest Framework by using the ``only`` and ``override`` parameters. Define a comma separated list, such as::
 
     rest_framework_extras.discover(router, only=["auth-user", "auth-permission"])
+
+todo: document override
 
 Unit Testing
 ============

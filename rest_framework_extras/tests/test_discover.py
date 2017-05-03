@@ -2,7 +2,7 @@ import unittest
 
 from django.core.urlresolvers import reverse
 
-from rest_framework_extras import SETTINGS
+from rest_framework_extras import get_settings
 
 
 class DiscoverTestCase(unittest.TestCase):
@@ -33,5 +33,5 @@ class DiscoverTestCase(unittest.TestCase):
         from rest_framework_extras.tests.urls import router
 
         for name, klass, model_name in router.registry:
-            self.failIf(name in SETTINGS["blacklist"])
+            self.failIf(name in get_settings()["blacklist"])
 
