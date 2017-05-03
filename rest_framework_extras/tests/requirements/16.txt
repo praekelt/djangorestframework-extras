@@ -1,3 +1,0 @@
-Django==1.6.11
-djangorestframework==3.2.5
-six==1.9.0

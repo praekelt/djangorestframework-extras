@@ -9,6 +9,7 @@ class UserSerializerForSuperUser(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = get_user_model()
+        fields = "__all__"
         write_only_fields = ("password",)
 
     def create(self, validated_data):
@@ -36,7 +37,7 @@ class UserSerializerForStaff(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("username", "first_name", "last_name", "email", "is_staff", "password")
-        readonly_fields = ("last_login", "date_joined", "is_active", "is_superuser")
+        read_only_fields = ("last_login", "date_joined", "is_active", "is_superuser")
         write_only_fields = ("password",)
 
     def create(self, validated_data):
@@ -64,7 +65,7 @@ class UserSerializerForUser(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("username", "first_name", "last_name", "email", "password")
-        readonly_fields = ("last_login", "date_joined", "is_active")
+        read_only_fields = ("last_login", "date_joined", "is_active")
         write_only_fields = ("password",)
 
     def update(self, instance, validated_data):
