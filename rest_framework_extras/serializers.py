@@ -165,6 +165,7 @@ class SerializerMeta(serializers.SerializerMetaclass):
             (object,),
             {
                 "model": model,
+                "fields": "__all__",
                 "form": form,
                 "admin": admin,
                 "admin_site": admin_site
