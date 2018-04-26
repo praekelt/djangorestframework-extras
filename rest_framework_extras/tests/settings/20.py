@@ -28,11 +28,10 @@ INSTALLED_APPS = (
 
 ROOT_URLCONF = "rest_framework_extras.tests.urls"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

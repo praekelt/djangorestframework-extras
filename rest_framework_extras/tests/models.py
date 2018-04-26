@@ -14,7 +14,7 @@ class Base(models.Model):
     another_editable_field = models.CharField(max_length=32)
     non_editable_field = models.CharField(max_length=32, editable=False)
     foreign_field = models.ForeignKey(
-        Foo,
+        Foo, on_delete=models.CASCADE
     )
     many_field = models.ManyToManyField(Bar)
 

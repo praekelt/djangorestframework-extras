@@ -2,9 +2,12 @@ import unittest
 import json
 
 
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.client import Client, RequestFactory
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from rest_framework.test import APIRequestFactory, APIClient
 

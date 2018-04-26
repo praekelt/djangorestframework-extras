@@ -108,7 +108,7 @@ Unit Testing
 
 Run tests by using the following command::
 
-    python manage.py test rest_framework_extras.tests --settings=rest_framework_extras.tests.settings.19
+    python manage.py test rest_framework_extras.tests --settings=rest_framework_extras.tests.settings.111
 
 License
 =======
