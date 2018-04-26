@@ -1,6 +1,9 @@
 import unittest
 
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from rest_framework_extras import get_settings
 

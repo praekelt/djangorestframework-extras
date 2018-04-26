@@ -2,9 +2,12 @@ import unittest
 import json
 
 
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.client import Client, RequestFactory
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from rest_framework.test import APIRequestFactory, APIClient
 
@@ -49,24 +52,24 @@ class ViewsTestCase(unittest.TestCase):
             another_editable_field="another_editable_field",
             foreign_field=cls.foo
         )
-        cls.vanilla.many_field = [cls.bar]
         cls.vanilla.save()
+        cls.vanilla.many_field.set([cls.bar])
 
         cls.with_form = models.WithForm.objects.create(
             editable_field="editable_field",
             another_editable_field="another_editable_field",
             foreign_field=cls.foo
         )
-        cls.with_form.many_field = [cls.bar]
         cls.with_form.save()
+        cls.with_form.many_field.set([cls.bar])
 
         cls.with_tricky_form = models.WithTrickyForm.objects.create(
             editable_field="editable_field",
             another_editable_field="another_editable_field",
             foreign_field=cls.foo
         )
-        cls.with_tricky_form.many_field = [cls.bar]
         cls.with_tricky_form.save()
+        cls.with_tricky_form.many_field.set([cls.bar])
 
     def test_vanilla_list(self):
         response = self.client.get("/tests-vanilla/")
