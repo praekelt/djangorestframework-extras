@@ -21,6 +21,7 @@ INSTALLED_APPS = (
     "rest_framework",
     "django.contrib.admin",
     "django.contrib.auth",
+    "django.contrib.messages",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sites",
@@ -28,10 +29,12 @@ INSTALLED_APPS = (
 
 ROOT_URLCONF = "rest_framework_extras.tests.urls"
 
-MIDDLEWARE = (
+MIDDLEWARE_CLASSES = (
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
+    "django.contrib.auth.middleware.MessageMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
