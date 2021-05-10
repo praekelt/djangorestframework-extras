@@ -150,8 +150,17 @@ def register(router, mapping=None):
             klass
         )
         # Provide a base_name to consider app_label as well
-        router.register(
-            r"%s" % pth,
-            klass,
-            base_name=pth
-        )
+        try:
+            router.register(
+                r"%s" % pth,
+                klass,
+                base_name=pth
+            )
+        except TypeError:
+            # DRF changed the arg to 'basename' in v3.9+, and using 'base_name' raises a TypeError.
+            # Catch that here to maintain compatibility.
+            router.register(
+                r"%s" % pth,
+                klass,
+                basename=pth
+            )
