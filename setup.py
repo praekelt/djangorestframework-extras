@@ -13,8 +13,7 @@ setup(
     url="http://github.com/praekelt/djangorestframework-extras",
     packages = find_packages(),
     install_requires = [
-        "djangorestframework<4.0,>=3.8.0"
-        "Django<3.0"
+        # Handled by requirements file
     ],
     include_package_data=True,
     classifiers=[

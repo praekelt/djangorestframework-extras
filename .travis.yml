@@ -1,18 +1,18 @@
 language: python
+python:
+  - "3.7"
 
-matrix:
-    include:
-        - python: 3.6
-          env: TOXENV=django111-py36
-        - python: 3.6
-          env: TOXENV=django20-py36
-        - python: 3.6
-          env: TOXENV=coverage
+cache:
+  pip: true
 
 install:
   - pip install --upgrade pip
-  - pip install tox
+  - pip install -r requirements.txt
   - pip install coverage
   - pip install coveralls
 
-script: tox --recreate -e $TOXENV
+script:
+  - coverage run --include=rest_framework_extras/tests/* manage.py test
+
+after_success:
+  - coveralls
