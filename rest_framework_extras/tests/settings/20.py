@@ -32,6 +32,7 @@ ROOT_URLCONF = "rest_framework_extras.tests.urls"
 MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.common.CommonMiddleware",
 )
 
