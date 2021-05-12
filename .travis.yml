@@ -2,15 +2,11 @@ language: python
 
 matrix:
     include:
-        - python: 2.7
-          env: TOXENV=django111-py27
-        - python: 3.5
-          env: TOXENV=django111-py35
-        - python: pypy
-          env: TOXENV=django111-pypy27
-        - python: 3.5
-          env: TOXENV=django20
-        - python: 2.7
+        - python: 3.6
+          env: TOXENV=django111-py36
+        - python: 3.6
+          env: TOXENV=django20-py36
+        - python: 3.6
           env: TOXENV=coverage
 
 install:
