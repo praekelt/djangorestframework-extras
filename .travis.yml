@@ -1,21 +1,18 @@
 language: python
+python:
+  - "3.7"
 
-matrix:
-    include:
-        - python: 2.7
-          env: TOXENV=django111-py27
-        - python: 3.5
-          env: TOXENV=django111-py35
-        - python: pypy
-          env: TOXENV=django111-pypy27
-        - python: 3.5
-          env: TOXENV=django20
-        - python: 2.7
-          env: TOXENV=coverage
+cache:
+  pip: true
 
 install:
-  - pip install tox
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
   - pip install coverage
   - pip install coveralls
 
-script: tox
+script:
+  - coverage run --include=rest_framework_extras/tests/* manage.py test
+
+after_success:
+  - coveralls

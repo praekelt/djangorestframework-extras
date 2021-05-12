@@ -42,7 +42,7 @@ class ViewsTestCase(unittest.TestCase):
         )
         cls.editor.set_password("password")
         cls.editor.save()
-        cls.client.login(username="editor", password="password")
+        cls.client.force_authenticate(cls.editor)
 
         cls.bar = models.Bar.objects.create()
         cls.foo = models.Foo.objects.create()

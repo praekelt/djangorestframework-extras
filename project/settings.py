@@ -1,5 +1,6 @@
 import os
 
+SECRET_KEY = 'secret'
 
 USE_TZ = True
 
@@ -21,6 +22,7 @@ INSTALLED_APPS = (
     "rest_framework",
     "django.contrib.admin",
     "django.contrib.auth",
+    "django.contrib.messages",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sites",
@@ -28,11 +30,11 @@ INSTALLED_APPS = (
 
 ROOT_URLCONF = "rest_framework_extras.tests.urls"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.common.CommonMiddleware",
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

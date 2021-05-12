@@ -13,7 +13,7 @@ setup(
     url="http://github.com/praekelt/djangorestframework-extras",
     packages = find_packages(),
     install_requires = [
-        "djangorestframework>=3.8.0",
+        # Handled by requirements file
     ],
     include_package_data=True,
     classifiers=[
