@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="djangorestframework-extras",
-    version="0.3.0",
+    version="0.4.0",
     description="Autogenerate API's for models. Expose core Django functionality. Validate against existing forms.",
     long_description = open("README.rst", "r").read(),
     author="Praekelt Consulting",
@@ -13,7 +13,7 @@ setup(
     url="http://github.com/praekelt/djangorestframework-extras",
     packages = find_packages(),
     install_requires = [
-        "djangorestframework>=3.8.0",
+        # Handled by requirements file
     ],
     include_package_data=True,
     classifiers=[

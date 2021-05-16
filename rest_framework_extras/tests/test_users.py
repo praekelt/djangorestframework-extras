@@ -68,7 +68,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_superuser_create_user(self):
-        self.client.login(username="superuser", password="password")
+        self.client.force_authenticate(self.superuser)
         new_pk = self.user_model.objects.all().last().id + 1
         data = {
             "username": "tsucu",
@@ -87,7 +87,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertNotEqual(obj.password, "password")
 
     def test_superuser_get_user(self):
-        self.client.login(username="superuser", password="password")
+        self.client.force_authenticate(self.superuser)
         response = self.client.get("/auth-user/")
         as_json = response.json()
         self.failIf("password" in as_json[0])
@@ -96,7 +96,7 @@ class UsersTestCase(unittest.TestCase):
         self.failIf("password" in as_json)
 
     def test_staff_create_user(self):
-        self.client.login(username="staff", password="password")
+        self.client.force_authenticate(self.staff)
         new_pk = self.user_model.objects.all().last().id + 1
         data = {
             "username": "tscu",
@@ -131,7 +131,7 @@ class UsersTestCase(unittest.TestCase):
 
     def test_staff_update_user(self):
         # Staff can't bump users to superuser
-        self.client.login(username="staff", password="password")
+        self.client.force_authenticate(self.staff)
         data = {
             "is_superuser": True
         }
@@ -142,7 +142,7 @@ class UsersTestCase(unittest.TestCase):
 
     def test_staff_update_superuser(self):
         # Staff can't edit superusers
-        self.client.login(username="staff", password="password")
+        self.client.force_authenticate(self.staff)
         data = {
             "email": "superuser@foo.com"
         }
@@ -154,7 +154,7 @@ class UsersTestCase(unittest.TestCase):
         )
 
     def test_staff_get_user(self):
-        self.client.login(username="staff", password="password")
+        self.client.force_authenticate(self.staff)
         response = self.client.get("/auth-user/")
         as_json = response.json()
         self.failIf("password" in as_json[0])
@@ -163,7 +163,7 @@ class UsersTestCase(unittest.TestCase):
         self.failIf("password" in as_json)
 
     def test_user_create_user(self):
-        self.client.login(username="user", password="password")
+        self.client.force_authenticate(self.user)
         data = {
             "username": "tucu",
             "password": "password"
@@ -173,7 +173,7 @@ class UsersTestCase(unittest.TestCase):
 
     def test_user_get_user(self):
         # User may only get himself
-        self.client.login(username="user", password="password")
+        self.client.force_authenticate(self.user)
         response = self.client.get("/auth-user/")
         self.assertEqual(response.status_code, 403)
         response = self.client.get("/auth-user/%s/" % self.staff.pk)
@@ -185,7 +185,7 @@ class UsersTestCase(unittest.TestCase):
 
     def test_user_update_user(self):
         # User may only update himself
-        self.client.login(username="user", password="password")
+        self.client.force_authenticate(self.user)
         data = {
             "email": "user@foo.com"
         }
