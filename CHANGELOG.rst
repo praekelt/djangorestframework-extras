@@ -2,6 +2,7 @@ Changelog
 =========
 
 0.4.0
+-----
 #. Support Python 3.6
 #. Support breaking changes in DRF 3.9+
 #. Drop support for Django 1, Python 2, 3.5 and PyPy.
